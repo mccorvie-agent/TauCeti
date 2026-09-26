@@ -77,7 +77,7 @@ variable [ProperlyDiscontinuousSMul Γ ℍ]
 
 /-- Holomorphy on the full coarse quotient can be checked after pullback to the upper
 half-plane, including at elliptic orbits. -/
-theorem mdifferentiable_iff_comp_quotientMk {F : orbitRel.Quotient Γ ℍ → E} :
+@[simp] theorem mdifferentiable_iff_comp_quotientMk {F : orbitRel.Quotient Γ ℍ → E} :
     MDifferentiable 𝓘(ℂ) 𝓘(ℂ, E) F ↔
       MDifferentiable 𝓘(ℂ) 𝓘(ℂ, E) (F ∘ Quotient.mk _) := by
   refine ⟨fun hF ↦ hF.comp (mdifferentiable_quotientMk Γ), fun hF q ↦ ?_⟩
