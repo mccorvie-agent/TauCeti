@@ -8,6 +8,7 @@ module
 public import Mathlib.NumberTheory.NumberField.DirichletDensity
 public import TauCeti.NumberTheory.Chebotarev.FrobeniusPrimeSet
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
+import TauCeti.NumberTheory.Cyclotomic.Aut
 import TauCeti.Analysis.SpecialFunctions.Log.OneDivSub
 import TauCeti.NumberTheory.ArithmeticDirichletSeries.Prime.IdealZetaSum
 import TauCeti.NumberTheory.Chebotarev.Density.Ramification
@@ -105,7 +106,7 @@ theorem hasDirichletDensity_frobeniusPrimeSet_galEquivZMod_symm
     NumberField.Set.HasDirichletDensity
       (frobeniusPrimeSet ℚ F (ConjClasses.mk ((IsCyclotomicExtension.Rat.galEquivZMod m F).symm a)))
       (1 / (Nat.totient m : ℝ)) := by
-  simpa only [IsGalois.card_aut_eq_finrank, IsCyclotomicExtension.finrank F
+  simpa only [IsCyclotomicExtension.card_aut_eq_totient ℚ F
     (Polynomial.cyclotomic.irreducible_rat (NeZero.pos m))] using
     hasDirichletDensity_cyclotomicFrobenius ℚ F m
       ((IsCyclotomicExtension.Rat.galEquivZMod m F).symm a)
