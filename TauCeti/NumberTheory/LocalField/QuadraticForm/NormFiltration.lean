@@ -9,6 +9,9 @@ public import TauCeti.NumberTheory.HilbertSymbol.NormSubgroup
 public import TauCeti.NumberTheory.LocalField.QuadraticForm.Defect
 public import TauCeti.NumberTheory.LocalField.Squares
 
+import TauCeti.NumberTheory.LocalField.QuadraticForm.NormIndex
+import TauCeti.NumberTheory.LocalField.QuadraticForm.RamificationDictionary
+
 /-!
 # Deep units are quadratic norms
 
@@ -52,6 +55,14 @@ theorem unitFiltration_le_quadraticNormSubgroup_of_defectExponent (h2 : (2 : K) 
       Subgroup.square Kˣ := by simpa using unitFiltration_le_square h2
   rcases Nat.eq_zero_or_pos d with rfl | hdpos
   · simpa using hsquares.trans (square_le_quadraticNormSubgroup (a : K))
+  by_cases hdeven : Even d
+  · have hu := (unramified_class_iff_even_defectExponent h2 hd).mpr
+      (by exact_mod_cast hdeven)
+    intro b hb
+    apply (mem_quadraticNormSubgroup_iff_even_of_unramified_class hu b).mpr
+    have hbv := (normalizedValuation_eq_one_iff b).mpr
+      ((mem_unitFiltration_zero b).mp (unitFiltration_antitone (Nat.zero_le _) hb))
+    simp [hbv]
   obtain ⟨π, hπ⟩ := IsDiscreteValuationRing.exists_irreducible (R := 𝒪[K])
   have hπ1 : valuation K (π : K) < 1 :=
     Valuation.integer.v_irreducible_lt_one (v := valuation K) hπ
