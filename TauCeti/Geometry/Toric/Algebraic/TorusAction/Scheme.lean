@@ -144,16 +144,19 @@ private theorem affineCoordinateRingCoaction_op_one (hi : IsIntegralLattice i)
       (affineCoordinateRingCoaction hi σ)).op
   η[T] ▷ X ≫ a = (λ_ X).hom := by
   apply Quiver.Hom.unop_inj
-  -- Passing to the opposite reverses composition and inverts the unitor/associator;
-  -- expose the algebra maps to apply the existing coordinate-ring identity.
-  change (CommAlgCat.ofHom (R := CommRingCat.of ℂ) (affineCoordinateRingCoaction hi σ)) ≫
-    (CommAlgCat.ofHom (Bialgebra.counitAlgHom (CommRingCat.of ℂ) (affineCoordinateRing hi ⊥)) ▷
-      CommAlgCat.of (CommRingCat.of ℂ) (affineCoordinateRing hi σ)) =
-    (λ_ (CommAlgCat.of (CommRingCat.of ℂ) (affineCoordinateRing hi σ))).inv
+  simp only [unop_comp, unop_whiskerRight,
+    unop_hom_leftUnitor, Quiver.Hom.unop_op, Opposite.unop_op]
   apply (cancel_mono (λ_ (CommAlgCat.of (CommRingCat.of ℂ) (affineCoordinateRing hi σ))).hom).mp
   simp only [Iso.inv_hom_id]
   apply CommAlgCat.hom_ext
-  exact affineCoordinateRingCoaction_counit hi σ
+  -- `CommAlgCat` chooses the tensor-product left-unit equivalence as its unitor.
+  have hunit : (λ_ (CommAlgCat.of (CommRingCat.of ℂ)
+      (affineCoordinateRing hi σ))).hom.hom =
+      (Algebra.TensorProduct.lid ℂ (affineCoordinateRing hi σ)).toAlgHom := rfl
+  simpa only [CommAlgCat.hom_comp, CommAlgCat.whiskerRight_hom,
+    CommAlgCat.one_op_of_unop_hom, CommAlgCat.hom_ofHom, CommAlgCat.hom_id,
+    hunit, AlgHom.comp_assoc]
+    using affineCoordinateRingCoaction_counit hi σ
 
 private theorem affineCoordinateRingCoaction_op_mul (hi : IsIntegralLattice i)
     (σ : PointedCone ℝ V) :
@@ -164,23 +167,18 @@ private theorem affineCoordinateRingCoaction_op_mul (hi : IsIntegralLattice i)
       (affineCoordinateRingCoaction hi σ)).op
   μ[T] ▷ X ≫ a = (α_ T T X).hom ≫ T ◁ a ≫ a := by
   apply Quiver.Hom.unop_inj
-  -- Passing to the opposite reverses composition and inverts the unitor/associator;
-  -- expose the algebra maps to apply the existing coordinate-ring identity.
-  change (CommAlgCat.ofHom (R := CommRingCat.of ℂ) (affineCoordinateRingCoaction hi σ)) ≫
-    (CommAlgCat.ofHom (Bialgebra.comulAlgHom (CommRingCat.of ℂ) (affineCoordinateRing hi ⊥)) ▷
-      CommAlgCat.of (CommRingCat.of ℂ) (affineCoordinateRing hi σ)) =
-    (CommAlgCat.ofHom (R := CommRingCat.of ℂ) (affineCoordinateRingCoaction hi σ)) ≫
-      (CommAlgCat.of (CommRingCat.of ℂ) (affineCoordinateRing hi ⊥) ◁
-        CommAlgCat.ofHom (R := CommRingCat.of ℂ) (affineCoordinateRingCoaction hi σ)) ≫
-      (α_ (CommAlgCat.of (CommRingCat.of ℂ) (affineCoordinateRing hi ⊥))
-        (CommAlgCat.of (CommRingCat.of ℂ) (affineCoordinateRing hi ⊥))
-        (CommAlgCat.of (CommRingCat.of ℂ) (affineCoordinateRing hi σ))).inv
+  simp only [unop_comp, unop_whiskerRight,
+    unop_whiskerLeft, unop_hom_associator,
+    Quiver.Hom.unop_op, Opposite.unop_op]
   apply (cancel_mono (α_ (CommAlgCat.of (CommRingCat.of ℂ) (affineCoordinateRing hi ⊥))
     (CommAlgCat.of (CommRingCat.of ℂ) (affineCoordinateRing hi ⊥))
     (CommAlgCat.of (CommRingCat.of ℂ) (affineCoordinateRing hi σ))).hom).mp
   simp only [Category.assoc, Iso.inv_hom_id, Category.comp_id]
   apply CommAlgCat.hom_ext
-  exact affineCoordinateRingCoaction_coassoc hi σ
+  simpa only [CommAlgCat.hom_comp, CommAlgCat.whiskerRight_hom,
+    CommAlgCat.whiskerLeft_hom, CommAlgCat.mul_op_of_unop_hom,
+    CommAlgCat.hom_ofHom, CommAlgCat.associator_hom_hom]
+    using affineCoordinateRingCoaction_coassoc hi σ
 
 private theorem denseTorus_one_eq_algSpec (hi : IsIntegralLattice i) :
     letI : (algSpec (.of ℂ)).LaxMonoidal :=
