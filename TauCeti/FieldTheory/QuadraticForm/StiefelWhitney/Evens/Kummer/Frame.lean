@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.Algebra.BigOperators.Field
-public import TauCeti.FieldTheory.QuadraticForm.StiefelWhitney.Evens.KummerRepresentation
+public import TauCeti.FieldTheory.QuadraticForm.StiefelWhitney.Evens.Kummer.Representation
 
 /-!
 # Diagonalizing the induced Kummer representation
