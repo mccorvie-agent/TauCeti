@@ -34,7 +34,8 @@ group homology for a classifying space.
 * A. Hatcher, *Algebraic Topology*, Section 3.H (local coefficients).
 * K. S. Brown, *Cohomology of Groups*, Springer, 1982, Section III.1 (coefficient sequences).
 
-The exactness argument uses Mathlib's AB4 instance for modules and its homology-sequence API.
+The exactness argument uses the AB4 instance `TauCeti.moduleCat_ab4OfSize` for modules in an
+independent universe, together with Mathlib's homology-sequence API.
 -/
 
 public section
@@ -44,7 +45,7 @@ noncomputable section
 open CategoryTheory Limits
 open scoped Simplicial
 
-universe u v
+universe u v w
 
 namespace TauCeti.LocalCoefficientSystem
 
@@ -54,7 +55,7 @@ variable (R : Type u) [Ring R] (X : TopCat.{v})
 The abbreviation keeps its objects and maps definitionally identified with the existing
 chain complexes and coefficient maps in homology-sequence statements. -/
 abbrev twistedChainComplexFunctor :
-    LocalCoefficientSystem.{u, v, v} R X ⥤ ChainComplex (ModuleCat.{v} R) ℕ where
+    LocalCoefficientSystem.{u, v, max v w} R X ⥤ ChainComplex (ModuleCat.{max v w} R) ℕ where
   obj := twistedChainComplex
   map := twistedChainComplexCoefficientMap
   map_id := twistedChainComplexCoefficientMap_id
@@ -62,13 +63,14 @@ abbrev twistedChainComplexFunctor :
 
 /-- The twisted chain functor sends a local system to its twisted chain complex. -/
 @[simp]
-lemma twistedChainComplexFunctor_obj (L : LocalCoefficientSystem.{u, v, v} R X) :
+lemma twistedChainComplexFunctor_obj (L : LocalCoefficientSystem.{u, v, max v w} R X) :
     (twistedChainComplexFunctor R X).obj L = twistedChainComplex L :=
   (rfl)
 
 /-- The twisted chain functor acts by the existing coefficient chain map. -/
 @[simp]
-lemma twistedChainComplexFunctor_map {L K : LocalCoefficientSystem.{u, v, v} R X} (f : L ⟶ K) :
+lemma twistedChainComplexFunctor_map {L K : LocalCoefficientSystem.{u, v, max v w} R X}
+    (f : L ⟶ K) :
     (twistedChainComplexFunctor R X).map f = twistedChainComplexCoefficientMap f :=
   (rfl)
 
@@ -79,9 +81,9 @@ variable {R X}
 -- presentations of the same coproduct without unfolding the twisted chain construction.
 private def twistedChainComplexFunctorEvalIso (n : ℕ) :
     twistedChainComplexFunctor R X ⋙
-        HomologicalComplex.eval (ModuleCat.{v} R) (.down ℕ) n ≅
+        HomologicalComplex.eval (ModuleCat.{max v w} R) (.down ℕ) n ≅
       (Functor.whiskeringLeft (Discrete ((TopCat.toSSet.obj X) _⦋n⦌))
-        (FundamentalGroupoid X) (ModuleCat.{v} R)).obj
+        (FundamentalGroupoid X) (ModuleCat.{max v w} R)).obj
         (Discrete.functor (fun σ ↦ initialVertex σ)) ⋙ colim := by
   refine NatIso.ofComponents (fun L ↦ eqToIso (twistedChainComplex_X L n) ≪≫
     (HasColimit.isoOfNatIso (Discrete.natIsoFunctor (F :=
@@ -97,31 +99,48 @@ private def twistedChainComplexFunctorEvalIso (n : ℕ) :
 
 /-- Twisted chains preserve finite limits of local coefficient systems. In particular a
 coefficient monomorphism stays injective on chains, without any flatness assumption. -/
-instance : PreservesFiniteLimits (twistedChainComplexFunctor R X) where
+instance : PreservesFiniteLimits (twistedChainComplexFunctor.{u, v, w} R X) where
   preservesFiniteLimits J _ _ :=
     HomologicalComplex.preservesLimitsOfShape_of_eval _ fun n ↦ by
+      have : AB4OfSize.{v} (ModuleCat.{max v w} R) := AB4OfSize_shrink.{v, w} _
       have : PreservesFiniteLimits (twistedChainComplexFunctor R X ⋙
-          HomologicalComplex.eval (ModuleCat.{v} R) (.down ℕ) n) :=
-        preservesFiniteLimits_of_natIso (twistedChainComplexFunctorEvalIso n).symm
+          HomologicalComplex.eval (ModuleCat.{max v w} R) (.down ℕ) n) :=
+        preservesFiniteLimits_of_natIso (twistedChainComplexFunctorEvalIso.{u, v, w} n).symm
       infer_instance
 
 /-- Twisted chains preserve finite colimits of local coefficient systems. -/
-instance : PreservesFiniteColimits (twistedChainComplexFunctor R X) where
+instance : PreservesFiniteColimits (twistedChainComplexFunctor.{u, v, w} R X) where
   preservesFiniteColimits J _ _ :=
     HomologicalComplex.preservesColimitsOfShape_of_eval _ fun n ↦ by
       have : PreservesFiniteColimits (twistedChainComplexFunctor R X ⋙
-          HomologicalComplex.eval (ModuleCat.{v} R) (.down ℕ) n) :=
-        preservesFiniteColimits_of_natIso (twistedChainComplexFunctorEvalIso n).symm
+          HomologicalComplex.eval (ModuleCat.{max v w} R) (.down ℕ) n) :=
+        preservesFiniteColimits_of_natIso (twistedChainComplexFunctorEvalIso.{u, v, w} n).symm
       infer_instance
 
 end TauCeti.LocalCoefficientSystem
+
+namespace CategoryTheory.ShortComplex
+
+open TauCeti.LocalCoefficientSystem
+
+/-- Consecutive maps of a coefficient short complex induce maps on twisted homology whose
+composite is zero. -/
+@[reassoc (attr := simp)]
+lemma twistedHomologyCoefficientMap_comp_eq_zero
+    {R : Type u} [Ring R] {X : TopCat.{v}}
+    (S : ShortComplex (TauCeti.LocalCoefficientSystem.{u, v, max v w} R X)) (n : ℕ) :
+    twistedHomologyCoefficientMap S.f n ≫ twistedHomologyCoefficientMap S.g n = 0 :=
+  ((S.map (twistedChainComplexFunctor R X)).map
+    (HomologicalComplex.homologyFunctor _ _ n)).zero
+
+end CategoryTheory.ShortComplex
 
 namespace CategoryTheory.ShortComplex.ShortExact
 
 open TauCeti.LocalCoefficientSystem
 
 variable {R : Type u} [Ring R] {X : TopCat.{v}}
-  {S T : ShortComplex (TauCeti.LocalCoefficientSystem.{u, v, v} R X)} (hS : S.ShortExact)
+  {S T : ShortComplex (TauCeti.LocalCoefficientSystem.{u, v, max v w} R X)} (hS : S.ShortExact)
 
 include hS
 
@@ -157,8 +176,7 @@ lemma twistedHomology_exact₁ (n m : ℕ) (h : m + 1 = n) :
 
 /-- Exactness at `Hₙ(X; L₂)` in the coefficient long exact sequence. -/
 lemma twistedHomology_exact₂ (n : ℕ) :
-    ((S.map (twistedChainComplexFunctor R X)).map
-      (HomologicalComplex.homologyFunctor _ _ n)).Exact :=
+    (ShortComplex.mk _ _ (S.twistedHomologyCoefficientMap_comp_eq_zero n)).Exact :=
   (hS.map_of_exact (twistedChainComplexFunctor R X)).homology_exact₂ n
 
 /-- Exactness at `Hₙ(X; L₃)` in the coefficient long exact sequence. -/
