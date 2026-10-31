@@ -115,7 +115,7 @@ theorem integral_norm_iteratedFDeriv_dilateField_apply (μ : Measure ℂ) [μ.Is
     Real.norm_eq_abs, sq_abs]
   rw [integral_const_mul, Measure.integral_comp_smul μ
     (fun z ↦ ‖iteratedFDeriv ℝ n (fun w ↦ x w i) z‖ ^ 2) t]
-  rw [show Module.finrank ℝ ℂ = 2 from Complex.finrank_real_complex,
+  rw [Complex.finrank_real_complex,
     abs_of_nonneg (inv_nonneg.mpr (sq_nonneg t))]
   simp only [smul_eq_mul]
   rw [← mul_assoc]
