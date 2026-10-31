@@ -12,16 +12,19 @@ public import TauCeti.Algebra.TypeAHeckeAlgebra.Embedding
 /-!
 # The real-parameter involution on type-A Hecke algebras
 
-For a star-fixed unit parameter in a commutative star ring, the type-A Hecke algebra has an
+For a star-fixed unit parameter in a commutative star ring, `InfiniteTypeAHeckeAlgebra` has an
 involution fixing every generator and conjugating scalars. In particular, real nonzero parameters
 give complex star algebras. The construction descends to the relation quotient by checking the
 quadratic relation and the reversed braid and distant-commutation relations in the opposite
-algebra.
+algebra. Its finite stages are invariant under the involution, and strand shifts and the index/sign
+characters commute with it.
 
-The finite presentation inherits its involution through the embedding into the infinite algebra;
-`TypeAHeckeAlgebra.star_Tw` sends `T_w` to `T_(w⁻¹)`, and the tower maps preserve star.
-Finite stages are invariant under the involution, and strand shifts and the index/sign characters
-commute with it. This supplies the algebraic star structure needed to discuss positive traces and
+The finite presentation `TypeAHeckeAlgebra` inherits its involution through `toInfinite` and
+`stageEquiv`. The lemmas `TypeAHeckeAlgebra.star_T` and `TypeAHeckeAlgebra.star_Tw` describe its
+action on generators and PBW vectors; `TypeAHeckeAlgebra.toInfinite_star` and
+`TypeAHeckeAlgebra.strandIncl_star` show that the embedding and tower maps preserve star.
+
+This supplies the algebraic star structure needed to discuss positive traces and
 self-adjoint elements; no positivity or C*-completion is asserted. The unit-circle convention, in
 which the generators are unitary rather than self-adjoint, is a different involution and is not
 constructed here.

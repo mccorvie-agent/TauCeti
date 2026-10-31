@@ -7,7 +7,7 @@ module
 
 public import TauCeti.Algebra.TypeAHeckeAlgebra.CanonicalTrace
 public import TauCeti.Algebra.TypeAHeckeAlgebra.Star
-public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.InnerProductSpace.Defs
 
 /-!
 # The positive regular form of the type-A Hecke algebra
@@ -112,7 +112,7 @@ theorem re_canonicalTrace_star_mul_self [Fintype W] (x : TypeAHeckeAlgebra 𝕜 
     RCLike.re (canonicalTrace cs (star x * x)) = ∑ w, ‖(basisTw q cs).repr x w‖ ^ 2 := by
   simp [canonicalTrace_star_mul, RCLike.conj_mul]
 
-/-- The canonical trace is positive on squares for every real nonzero parameter. -/
+/-- The real part of `τ(x* x)` is nonnegative for every real nonzero parameter. -/
 theorem re_canonicalTrace_star_mul_self_nonneg [Finite W] (x : TypeAHeckeAlgebra 𝕜 q n) :
     0 ≤ RCLike.re (canonicalTrace cs (star x * x)) := by
   let := Fintype.ofFinite W
@@ -155,13 +155,15 @@ theorem regularInnerProductCore_inner [Finite W] (x y : TypeAHeckeAlgebra 𝕜 q
     (regularInnerProductCore cs).inner x y = canonicalTrace cs (star x * y) := (rfl)
 
 /-- Left multiplication by a simple generator is self-adjoint for the regular inner product. -/
-theorem regularInnerProductCore_T_mul [Finite W] (i : Fin (n - 1)) (x y : TypeAHeckeAlgebra 𝕜 q n) :
+theorem regularInnerProductCore_inner_T_mul_left [Finite W] (i : Fin (n - 1))
+    (x y : TypeAHeckeAlgebra 𝕜 q n) :
     (regularInnerProductCore cs).inner (T q i * x) y =
       (regularInnerProductCore cs).inner x (T q i * y) := by
   simp only [regularInnerProductCore_inner, canonicalTrace_star_mul_left, star_T]
 
 /-- Right multiplication by a simple generator is self-adjoint for the regular inner product. -/
-theorem regularInnerProductCore_mul_T [Finite W] (i : Fin (n - 1)) (x y : TypeAHeckeAlgebra 𝕜 q n) :
+theorem regularInnerProductCore_inner_mul_T_left [Finite W] (i : Fin (n - 1))
+    (x y : TypeAHeckeAlgebra 𝕜 q n) :
     (regularInnerProductCore cs).inner (x * T q i) y =
       (regularInnerProductCore cs).inner x (y * T q i) := by
   simp only [regularInnerProductCore_inner, canonicalTrace_star_mul_right, star_T]
