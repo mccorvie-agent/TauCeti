@@ -5,10 +5,10 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.RingTheory.Invariant.Basic
+public import TauCeti.RingTheory.Invariant.Basic
 public import Mathlib.RingTheory.Unramified.Locus
 import Mathlib.Algebra.Module.Submodule.Union
-import Mathlib.Algebra.Polynomial.Derivative
+import Mathlib.RingTheory.Etale.Kaehler
 
 /-!
 # Trivial inertia implies unramifiedness for finite invariant extensions
@@ -37,24 +37,6 @@ The proof uses Mathlib's `Algebra.IsInvariant.charpoly_mem_lifts` and
 public section
 
 open Polynomial
-
-namespace MulSemiringAction
-
-variable {A G : Type*} [CommRing A] [Group G] [Fintype G] [DecidableEq G] [MulSemiringAction G A]
-
-/-- The derivative of the orbit polynomial at `a` is the product of its displacements by
-nonidentity group elements. Repeated orbit values are allowed. -/
-theorem eval_derivative_charpoly (a : A) :
-    (charpoly G a).derivative.eval a = ∏ g ∈ Finset.univ.erase (1 : G), (a - g • a) := by
-  classical
-  have hprod : charpoly G a = (X - C a) *
-      ∏ g ∈ Finset.univ.erase (1 : G), (X - C (g • a)) := by
-    simpa only [charpoly_eq, one_smul] using
-      (Finset.mul_prod_erase Finset.univ (fun g : G ↦ X - C (g • a)) (Finset.mem_univ 1)).symm
-  rw [hprod, derivative_mul]
-  simp [eval_prod]
-
-end MulSemiringAction
 
 namespace Ideal
 
@@ -120,16 +102,12 @@ theorem isUnramifiedAt_of_inertia_eq_bot (Q : Ideal A) [Q.IsPrime]
     exact ha none hDa
   have hD (a : A) : KaehlerDifferential.D R S (algebraMap A S a) = 0 :=
     LinearMap.congr_fun hd a
-  -- A fraction has zero differential once its numerator and its unit denominator do.
-  have hlocal (z : S) : KaehlerDifferential.D R S z = 0 := by
-    obtain ⟨⟨a, s⟩, hs⟩ := IsLocalization.surj Q.primeCompl z
-    have heq := congrArg (KaehlerDifferential.D R S) hs
-    rw [Derivation.leibniz, hD, hD, smul_zero, zero_add] at heq
-    exact (IsLocalization.map_units S s).smul_eq_zero.mp heq
   have hzero : (⊤ : Submodule S Ω[S⁄R]) ≤ ⊥ := by
-    rw [← KaehlerDifferential.span_range_derivation, Submodule.span_le]
+    rw [← KaehlerDifferential.span_range_map_derivation_of_isLocalization R A S Q.primeCompl,
+      Submodule.span_le]
     rintro _ ⟨a, rfl⟩
-    exact hlocal a
+    rw [Function.comp_apply, KaehlerDifferential.map_D]
+    exact hD a
   exact ⟨(subsingleton_iff_forall_eq 0).mpr fun z ↦ hzero trivial⟩
 
 end Ideal
