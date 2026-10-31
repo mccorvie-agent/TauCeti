@@ -27,7 +27,7 @@ example :
     let cap : Assignment (fun _ _ : Bool ↦ Bool) ℕ :=
       fun x y _ ↦ if x = false ∧ y = true then 3 else 0
     ∃ f : NatFlow cap false true,
-      f.toNat = cap ∧ f.toNat ≤ cap ∧ f.val = 6 ∧
+      f.natAssignment = cap ∧ f.natAssignment ≤ cap ∧ f.val = 6 ∧
         f.val = ((arrowSum cap {false} {true} : ℕ) : ℤ) := by
   intro cap
   let f : NatFlow cap false true :=
@@ -35,7 +35,7 @@ example :
       mem_Icc := ⟨fun _ _ e ↦ Int.natCast_nonneg (cap e), le_rfl⟩
       conserve v hvs hvt := by cases v <;> simp_all
       excessAt_sink_nonneg := by norm_num [excessAt_def, cap, Assignment.map] }
-  refine ⟨f, f.toNat_eq_iff.mpr rfl, f.toNat_le, ?_, ?_⟩
+  refine ⟨f, f.natAssignment_eq_iff.mpr rfl, (fun _ _ e ↦ f.natAssignment_le e), ?_, ?_⟩
   · norm_num [f, BoundedFlow.val_def, excessAt_def, cap, Assignment.map]
   · norm_num [f, BoundedFlow.val_def, excessAt_def, arrowSum_def, cap, Assignment.map]
 
@@ -54,7 +54,7 @@ example :
       excessAt_sink_nonneg := by norm_num [excessAt_def, cap, Assignment.map] }
   refine ⟨f, f.toNNRat_eq_iff.mpr rfl, f.toNNRat_le, ?_, ?_⟩
   · norm_num [f, BoundedFlow.val_def, excessAt_def, cap, Assignment.map]
-  · rw [NNRat.coe_arrowSum]
+  · rw [coe_arrowSum_nonneg]
     norm_num [f, BoundedFlow.val_def, excessAt_def, arrowSum_def, cap,
       Assignment.map]
 
@@ -73,7 +73,7 @@ example :
       excessAt_sink_nonneg := by norm_num [excessAt_def, cap, Assignment.map] }
   refine ⟨f, f.toNNReal_eq_iff.mpr rfl, f.toNNReal_le, ?_, ?_⟩
   · norm_num [f, BoundedFlow.val_def, excessAt_def, cap, Assignment.map]
-  · rw [NNReal.coe_arrowSum]
+  · rw [coe_arrowSum_nonneg]
     norm_num [f, BoundedFlow.val_def, excessAt_def, arrowSum_def, cap,
       Assignment.map]
 
