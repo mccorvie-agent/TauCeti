@@ -54,7 +54,10 @@ example :
       excessAt_sink_nonneg := by norm_num [excessAt_def, cap, Assignment.map] }
   refine ⟨f, f.toNNRat_eq_iff.mpr rfl, f.toNNRat_le, ?_, ?_⟩
   · norm_num [f, BoundedFlow.val_def, excessAt_def, cap, Assignment.map]
-  · rw [coe_arrowSum_nonneg]
+  · have hcoe : ((arrowSum cap {false} {true} : ℚ≥0) : ℚ) =
+        arrowSum (cap.map NNRat.coeHom) {false} {true} :=
+      map_arrowSum NNRat.coeHom cap {false} {true}
+    rw [hcoe]
     norm_num [f, BoundedFlow.val_def, excessAt_def, arrowSum_def, cap,
       Assignment.map]
 
@@ -73,7 +76,10 @@ example :
       excessAt_sink_nonneg := by norm_num [excessAt_def, cap, Assignment.map] }
   refine ⟨f, f.toNNReal_eq_iff.mpr rfl, f.toNNReal_le, ?_, ?_⟩
   · norm_num [f, BoundedFlow.val_def, excessAt_def, cap, Assignment.map]
-  · rw [coe_arrowSum_nonneg]
+  · have hcoe : ((arrowSum cap {false} {true} : ℝ≥0) : ℝ) =
+        arrowSum (cap.map NNReal.toRealHom) {false} {true} :=
+      map_arrowSum NNReal.toRealHom cap {false} {true}
+    rw [hcoe]
     norm_num [f, BoundedFlow.val_def, excessAt_def, arrowSum_def, cap,
       Assignment.map]
 
