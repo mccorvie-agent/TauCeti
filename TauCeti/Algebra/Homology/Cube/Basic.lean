@@ -175,6 +175,15 @@ of height `#S = r`. -/
 def cubeComplexπ {r : ℤ} (S : {S : Finset ι // (#S : ℤ) = r}) : F.cubeComplex.X r ⟶ F.obj S.1 :=
   biproduct.π (fun S : {S : Finset ι // (#S : ℤ) = r} ↦ F.obj S.1) S
 
+/-- Transporting a cube term to an equal height preserves each vertex inclusion. -/
+@[reassoc (attr := simp)]
+lemma cubeComplexι_comp_XIsoOfEq_hom {r r' : ℤ} (h : r = r')
+    (S : {S : Finset ι // (#S : ℤ) = r}) :
+    F.cubeComplexι S ≫ (F.cubeComplex.XIsoOfEq h).hom =
+      F.cubeComplexι ⟨S.1, S.2.trans h⟩ := by
+  subst h
+  simp
+
 /-- The inclusion of a vertex followed by the projection onto a vertex of the same height is the
 identity when the vertices agree, and zero otherwise. -/
 @[reassoc]
