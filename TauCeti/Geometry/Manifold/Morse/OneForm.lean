@@ -65,7 +65,7 @@ theorem IsPrimitiveOn.eq_zero_iff_mem_criticalPoints (hf : IsPrimitiveOn α f U)
 section Independence
 
 /-- Local primitives of the same one-form have the same preferred-chart Hessian at every
-common point. At a zero this is the intrinsic critical Hessian. -/
+common point. -/
 theorem IsPrimitiveOn.criticalHessian_eq (hf : IsPrimitiveOn α f U)
     (hg : IsPrimitiveOn α g V) (hxU : x ∈ U) (hxV : x ∈ V) :
     criticalHessian I f x = criticalHessian I g x := by
@@ -84,8 +84,6 @@ theorem IsPrimitiveOn.manifoldMorseIndex_eq (hf : IsPrimitiveOn α f U)
     manifoldMorseIndex I f x = manifoldMorseIndex I g x := by
   simp only [manifoldMorseIndex_eq_sigNeg_criticalHessian, hf.criticalHessian_eq hg hxU hxV]
 
-variable [I.Boundaryless]
-
 /-- Nondegeneracy at a common point can be tested using either local potential. -/
 theorem IsPrimitiveOn.isManifoldNondegenerateCriticalPoint_iff
     (hf : IsPrimitiveOn α f U) (hg : IsPrimitiveOn α g V) (hxU : x ∈ U) (hxV : x ∈ V) :
@@ -95,15 +93,21 @@ theorem IsPrimitiveOn.isManifoldNondegenerateCriticalPoint_iff
       (hg : IsPrimitiveOn α g V) (hxU : x ∈ U) (hxV : x ∈ V)
       (h : IsManifoldNondegenerateCriticalPoint I f x) :
       IsManifoldNondegenerateCriticalPoint I g x := by
-    have hs : ContMDiffAt I 𝓘(ℝ) 2 g x :=
-      (h.contMDiffAt.add contMDiffAt_const).congr_of_eventuallyEq
-        (hg.eventuallyEq_add_const hf hxV hxU)
-    rw [isManifoldNondegenerateCriticalPoint_iff_criticalHessian] at h ⊢
-    refine ⟨hs, ?_, ?_⟩
-    · have hz := (hf.eq_zero_iff_mem_criticalPoints hxU).2 (mem_criticalPoints.2 h.2.1)
-      exact mem_criticalPoints.1 ((hg.eq_zero_iff_mem_criticalPoints hxV).1 hz)
-    · rw [hg.criticalHessian_eq hf hxV hxU]
-      exact h.2.2
+    rw [TauCeti.isManifoldNondegenerateCriticalPoint_iff] at h ⊢
+    have hgf : g ∘ (extChartAt I x).symm =ᶠ[𝓝 (extChartAt I x x)]
+        (fun y ↦ (f ∘ (extChartAt I x).symm) y + (g x - f x)) := by
+      have heq := hg.eventuallyEq_add_const hf hxV hxU
+      have hchart : (extChartAt I x).symm (extChartAt I x x) = x := by simp
+      have ht : Tendsto (extChartAt I x).symm (𝓝 (extChartAt I x x)) (𝓝 x) := by
+        simpa only [hchart] using (continuousAt_extChartAt_symm (I := I) x).tendsto
+      exact heq.comp_tendsto ht
+    have hd : fderiv ℝ (g ∘ (extChartAt I x).symm) =ᶠ[𝓝 (extChartAt I x x)]
+        fderiv ℝ (f ∘ (extChartAt I x).symm) :=
+      hgf.fderiv.trans (Eventually.of_forall fun y ↦ fderiv_add_const (g x - f x))
+    refine ⟨(h.contDiffAt.add contDiffAt_const).congr_of_eventuallyEq hgf, ?_, ?_⟩
+    · rw [hd.eq_of_nhds, h.fderiv_eq_zero]
+    · rw [hd.fderiv_eq]
+      exact h.isInvertible
   exact ⟨transfer hf hg hxU hxV, transfer hg hf hxV hxU⟩
 
 /-- Every local primitive of a Morse one-form has a nondegenerate critical point at each zero
@@ -114,7 +118,6 @@ theorem IsMorseOneForm.isManifoldNondegenerateCriticalPoint (hα : IsMorseOneFor
   obtain ⟨g, V, hxV, hg, hcrit⟩ := hα.exists_nondegenerate_primitive x hx
   exact (hg.isManifoldNondegenerateCriticalPoint_iff hf hxV hxU).1 hcrit
 
-omit [I.Boundaryless] in
 /-- A zero of a Morse one-form is isolated among its zeros. -/
 theorem IsMorseOneForm.eventually_ne_zero (hα : IsMorseOneForm α) (hx : α x = 0) :
     ∀ᶠ y in 𝓝[≠] x, α y ≠ 0 := by
