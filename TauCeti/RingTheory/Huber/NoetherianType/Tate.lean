@@ -9,7 +9,6 @@ public import TauCeti.RingTheory.Huber.NoetherianType.Basic
 
 import TauCeti.RingTheory.Huber.WeightedRestrictedSeries.Noetherian
 import TauCeti.Topology.Algebra.Ring.Subring
-import Mathlib.RingTheory.Localization.Submodule
 
 /-!
 # Noetherian type for Tate rings
@@ -30,27 +29,6 @@ power-series algebras in the definition of strong noetherianness are separated c
 
 public section
 
-open Topology
-
-namespace Subring
-
-variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-  [TauCeti.Huber.IsTateRing A]
-
-/-- A Tate ring with a noetherian open subring is noetherian: it is a localization of that
-subring at a positive power of a pseudouniformiser. No boundedness or completeness is needed. -/
-theorem isNoetherianRing_of_isOpen (S : Subring A) [IsNoetherianRing S]
-    (hS : IsOpen (S : Set A)) : IsNoetherianRing A := by
-  obtain ⟨ϖ, hϖ⟩ := TauCeti.Huber.IsTateRing.exists_isPseudoUniformizer (A := A)
-  obtain ⟨n, hn⟩ := Filter.eventually_atTop.mp
-    (hϖ.isTopologicallyNilpotent.eventually_mem (hS.mem_nhds S.zero_mem))
-  let s : S := ⟨ϖ ^ (n + 1), hn (n + 1) (by omega)⟩
-  have : IsLocalization.Away s A := S.isLocalizationAway_of_isOpen hS s
-    (hϖ.isTopologicallyNilpotent.pow (Nat.succ_ne_zero n)) (hϖ.isUnit.pow (n + 1))
-  exact IsLocalization.isNoetherianRing (Submonoid.powers s) A inferInstance
-
-end Subring
-
 namespace TauCeti.Huber
 
 variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A] [IsTateRing A]
@@ -62,8 +40,11 @@ theorem PairOfDefinition.isStronglyNoetherian (P : PairOfDefinition A)
   refine ⟨fun k ↦ ?_⟩
   have := P.isNoetherianRing_weighted_completion_ringOfDefinition
     (isWeightFamily_one_weight (k := k)) (fun _ ↦ Set.finite_singleton 1)
+  obtain ⟨ϖ, hϖ⟩ := IsTateRing.exists_isPseudoUniformizer
+    (A := restrictedMvPowerSeriesCompletion k A)
   exact Subring.isNoetherianRing_of_isOpen _
     (P.weighted (isWeightFamily_one_weight (k := k))).completion.isOpen_ringOfDefinition
+    hϖ.isTopologicallyNilpotent hϖ.isUnit
 
 /-- For a Tate ring, noetherian type implies strong noetherianness. -/
 theorem IsNoetherianType.isStronglyNoetherian [hA : IsNoetherianType A] :
