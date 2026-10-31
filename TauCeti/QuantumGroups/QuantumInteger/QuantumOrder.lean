@@ -37,7 +37,8 @@ theorem quantumOrder_def (δ : R) :
     quantumOrder δ = ⨅ n : {n : ℕ // 0 < n ∧ qInt R δ n = 0}, (n.val : ℕ∞) := (rfl)
 
 /-- A positive vanishing index bounds the quantum order from above. -/
-theorem quantumOrder_le {δ : R} {n : ℕ} (hn : 0 < n) (h : qInt R δ n = 0) :
+theorem quantumOrder_le_of_qInt_eq_zero {δ : R} {n : ℕ} (hn : 0 < n)
+    (h : qInt R δ n = 0) :
     quantumOrder δ ≤ n := by
   rw [quantumOrder_def]
   exact iInf_le (fun k : {k : ℕ // 0 < k ∧ qInt R δ k = 0} => (k.val : ℕ∞)) ⟨n, hn, h⟩
@@ -66,7 +67,7 @@ theorem quantumOrder_eq_natCast_iff (δ : R) (n : ℕ) :
 theorem qInt_ne_zero_of_lt_quantumOrder {δ : R} {n : ℕ} (hn : 0 < n)
     (h : (n : ℕ∞) < quantumOrder δ) : qInt R δ n ≠ 0 := by
   intro hz
-  exact (not_le_of_gt h) (quantumOrder_le hn hz)
+  exact (not_le_of_gt h) (quantumOrder_le_of_qInt_eq_zero hn hz)
 
 /-- A bound below the quantum order is equivalent to nonvanishing through that bound. -/
 theorem lt_quantumOrder_iff (δ : R) (n : ℕ) :
@@ -131,20 +132,24 @@ open TauCeti
 
 variable {R S : Type*} [CommRing R] [CommRing S]
 
+/-- A ring homomorphism can only decrease the quantum order of a loop parameter. -/
+theorem quantumOrder_map_le (f : R →+* S) (δ : R) :
+    quantumOrder (f δ) ≤ quantumOrder δ := by
+  rw [quantumOrder_def δ]
+  apply le_iInf
+  intro n
+  apply quantumOrder_le_of_qInt_eq_zero n.property.1
+  simpa only [← f.map_qInt, map_zero] using congrArg f n.property.2
+
 /-- An injective ring homomorphism preserves the quantum order of each loop parameter. -/
-theorem quantumOrder_map (f : R →+* S) (hf : Function.Injective f) (δ : R) :
+theorem quantumOrder_map_of_injective (f : R →+* S) (hf : Function.Injective f) (δ : R) :
     quantumOrder (f δ) = quantumOrder δ := by
-  apply le_antisymm
-  · rw [quantumOrder_def δ]
-    apply le_iInf
-    intro n
-    apply quantumOrder_le n.property.1
-    simpa only [← f.map_qInt, map_zero] using congrArg f n.property.2
-  · rw [quantumOrder_def (f δ)]
-    apply le_iInf
-    intro n
-    apply quantumOrder_le n.property.1
-    apply hf
-    simpa only [f.map_qInt, map_zero] using n.property.2
+  refine le_antisymm (f.quantumOrder_map_le δ) ?_
+  rw [quantumOrder_def (f δ)]
+  apply le_iInf
+  intro n
+  apply quantumOrder_le_of_qInt_eq_zero n.property.1
+  apply hf
+  simpa only [f.map_qInt, map_zero] using n.property.2
 
 end RingHom
